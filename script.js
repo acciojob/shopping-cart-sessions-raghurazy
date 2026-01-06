@@ -7,13 +7,20 @@ const products = [
   { id: 5, name: "Product 5", price: 50 },
 ];
 
-// Cart array
-let cart = [];
-
 // DOM elements
 const productList = document.getElementById("product-list");
 const cartList = document.getElementById("cart-list");
 const clearCartBtn = document.getElementById("clear-cart-btn");
+
+// Get cart from sessionStorage
+function getCart() {
+  return JSON.parse(sessionStorage.getItem("cart")) || [];
+}
+
+// Save cart to sessionStorage
+function saveCart(cart) {
+  sessionStorage.setItem("cart", JSON.stringify(cart));
+}
 
 // Render product list
 function renderProducts() {
@@ -31,40 +38,33 @@ function renderProducts() {
 
 // Render cart list
 function renderCart() {
+  const cart = getCart();
   cartList.innerHTML = "";
 
   cart.forEach((item) => {
     const li = document.createElement("li");
-    li.innerHTML = `
-      ${item.name} - $${item.price}
-      <button onclick="removeFromCart(${item.id})">
-        Remove
-      </button>
-    `;
+    li.textContent = `${item.name} - $${item.price}`;
     cartList.appendChild(li);
   });
 }
 
 // Add item to cart
 function addToCart(productId) {
+  const cart = getCart();
   const product = products.find((p) => p.id === productId);
-  cart.push(product);
-  renderCart();
-}
 
-// Remove item from cart
-function removeFromCart(productId) {
-  cart = cart.filter((item) => item.id !== productId);
+  cart.push(product); // duplicates allowed (required by test)
+  saveCart(cart);
   renderCart();
 }
 
 // Clear cart
 function clearCart() {
-  cart = [];
+  sessionStorage.removeItem("cart");
   renderCart();
 }
 
-// Event listener for Add to Cart buttons
+// Event delegation for Add to Cart
 productList.addEventListener("click", (e) => {
   if (e.target.classList.contains("add-to-cart-btn")) {
     const productId = Number(e.target.dataset.id);
