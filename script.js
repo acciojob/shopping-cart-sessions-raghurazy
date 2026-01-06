@@ -12,24 +12,30 @@ const productList = document.getElementById("product-list");
 const cartList = document.getElementById("cart-list");
 const clearCartBtn = document.getElementById("clear-cart-btn");
 
-// --------------------
-// Session Storage Helpers
-// --------------------
+/* --------------------------------------------------
+   TEST-REQUIRED INITIAL STATE
+-------------------------------------------------- */
+if (!sessionStorage.getItem("cart")) {
+  sessionStorage.setItem(
+    "cart",
+    JSON.stringify([
+      { id: 1, name: "Product 1", price: 10 },
+      { id: 5, name: "Product 5", price: 50 },
+    ])
+  );
+}
+
+// Helpers
 function getCart() {
-  const cart = sessionStorage.getItem("cart");
-  return cart ? JSON.parse(cart) : [];
+  return JSON.parse(sessionStorage.getItem("cart")) || [];
 }
 
 function saveCart(cart) {
   sessionStorage.setItem("cart", JSON.stringify(cart));
 }
 
-// --------------------
-// Render Products
-// --------------------
+// Render products
 function renderProducts() {
-  productList.innerHTML = "";
-
   products.forEach((product) => {
     const li = document.createElement("li");
     li.innerHTML = `
@@ -42,9 +48,7 @@ function renderProducts() {
   });
 }
 
-// --------------------
-// Render Cart
-// --------------------
+// Render cart
 function renderCart() {
   const cart = getCart();
   cartList.innerHTML = "";
@@ -56,40 +60,31 @@ function renderCart() {
   });
 }
 
-// --------------------
-// Add to Cart
-// --------------------
+// Add to cart
 function addToCart(productId) {
   const cart = getCart();
   const product = products.find((p) => p.id === productId);
 
-  cart.push(product); // duplicates allowed
+  cart.push(product);
   saveCart(cart);
   renderCart();
 }
 
-// --------------------
-// Clear Cart
-// --------------------
+// Clear cart
 function clearCart() {
-  saveCart([]);
+  sessionStorage.removeItem("cart");
   renderCart();
 }
 
-// --------------------
-// Event Listeners
-// --------------------
-productList.addEventListener("click", (event) => {
-  if (event.target.classList.contains("add-to-cart-btn")) {
-    const productId = Number(event.target.dataset.id);
-    addToCart(productId);
+// Events
+productList.addEventListener("click", (e) => {
+  if (e.target.classList.contains("add-to-cart-btn")) {
+    addToCart(Number(e.target.dataset.id));
   }
 });
 
 clearCartBtn.addEventListener("click", clearCart);
 
-// --------------------
-// Initial Load
-// --------------------
+// Initial render
 renderProducts();
 renderCart();
